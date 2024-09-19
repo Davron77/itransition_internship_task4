@@ -1,7 +1,7 @@
-import React from "react";
-
-const AuthLayout = () => {
-  return <div>AuthLayout</div>;
-};
-
-export default AuthLayout;
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <section>{children}</section>;
+}
