@@ -1,23 +1,28 @@
-// Example for fetching and displaying users
 "use client";
 import { useEffect, useState } from "react";
-import { collection, getDocs, updateDoc, doc } from "firebase/firestore";
-import { auth, db } from "@/utils/firabase-config";
-import { onAuthStateChanged } from "firebase/auth";
-import adminAuth from "@/utils/firabase-admin-config";
-import { getAuth } from "firebase-admin/auth";
-// import { getAuth } from "firebase-admin/auth";
+import { collection, getDocs } from "firebase/firestore";
+import { db } from "@/utils/firabase-config";
 
 const AdminPanel = () => {
-  const [users, setUsers] = useState([]);
+  const [users, setUsers] = useState<any>([]);
 
-  //   useEffect(() => {
+  const getUsers = async () => {
+    const querySnapshot = await getDocs(collection(db, "users"));
+    const users = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
 
-  //   }, []);
+    setUsers(users);
+  };
+
+  useEffect(() => {
+    getUsers();
+  }, []);
 
   return (
     <div className="container mx-auto">
-      {/* <table className="min-w-full">
+      <table className="min-w-full">
         <thead>
           <tr>
             <th>
@@ -31,7 +36,7 @@ const AdminPanel = () => {
           </tr>
         </thead>
         <tbody>
-          {users.map((user) => (
+          {users?.map((user: any) => (
             <tr key={user.id}>
               <td>
                 <input type="checkbox" />
@@ -41,12 +46,12 @@ const AdminPanel = () => {
               <td>{user.email}</td>
               <td>{user.status}</td>
               <td>
-                <button onClick={() => handleBlockUser(user.id)}>Block</button>
+                <button>Block</button>
               </td>
             </tr>
           ))}
         </tbody>
-      </table> */}
+      </table>
     </div>
   );
 };

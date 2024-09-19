@@ -1,4 +1,7 @@
+"use client";
+
 import AdminPanel from "@/components/admin/adminPanel";
+import withAuth from "@/layout/withAuth";
 import React from "react";
 
 const Admin = () => {
@@ -9,4 +12,4 @@ const Admin = () => {
   );
 };
 
-export default Admin;
+export default withAuth(Admin);
