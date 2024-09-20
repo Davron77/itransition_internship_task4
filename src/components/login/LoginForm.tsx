@@ -5,6 +5,7 @@ import { auth } from "@/utils/firabase-config";
 import { useRouter } from "next/navigation";
 import Button from "../ui/Button";
 import { setTUserData } from "@/utils/localStorage";
+import Link from "next/link";
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false);
@@ -90,6 +91,15 @@ const LoginForm = () => {
               <Button loading={loading}>Login</Button>
             </div>
           </form>
+          <p className="mt-10 text-center text-sm text-gray-500">
+            Not a member?{" "}
+            <Link
+              href="/register"
+              className="font-semibold leading-6 text-indigo-600 hover:text-indigo-500"
+            >
+              Register now
+            </Link>
+          </p>
         </div>
       </div>
     </>
