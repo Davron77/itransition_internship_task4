@@ -1,6 +1,8 @@
+import { UserData } from "./types";
+
 export const getUserData = () => {
   const token = localStorage.getItem("userData");
-  return token;
+  return JSON.parse(token || "{}") as UserData;
 };
 
 export const setTUserData = (token: string) => {

@@ -1,33 +1,29 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, ComponentType } from "react";
 import { useRouter } from "next/navigation";
-import { onAuthStateChanged } from "firebase/auth";
-import { auth } from "@/utils/firabase-config";
+import { getUserData } from "@/utils/localStorage";
 
-const withAuth = (WrappedComponent: any) => {
-  return (props: any) => {
+const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
+  return (props: P) => {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
-    const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
-      const unsubscribe = onAuthStateChanged(auth, (user) => {
-        if (!user) {
-          router.push("/login"); // Redirect to login if not authenticated
-        } else {
-          setUser(user);
-          setLoading(false);
-        }
-      });
+      const token = getUserData()?.stsTokenManager?.accessToken;
 
-      return () => unsubscribe();
+      if (!token) {
+        router.push("/login");
+        setLoading(false);
+      } else {
+        setLoading(false);
+      }
     }, [router]);
 
     if (loading) {
       return <div>Loading...</div>;
     }
 
-    return <WrappedComponent {...props} user={user} />;
+    return <WrappedComponent {...props} />;
   };
 };
 
