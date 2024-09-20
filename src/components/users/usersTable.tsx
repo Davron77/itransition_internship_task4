@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "@/utils/firabase-config";
 
-const AdminPanel = () => {
+const UsersTable = () => {
   const [users, setUsers] = useState<any>([]);
 
   const getUsers = async () => {
@@ -56,4 +56,4 @@ const AdminPanel = () => {
   );
 };
 
-export default AdminPanel;
+export default UsersTable;
