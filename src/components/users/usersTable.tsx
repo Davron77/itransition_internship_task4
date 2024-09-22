@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import Toolbar from "./Toolbar";
+import { formatDate } from "@/utils/format";
 
 interface User {
   id: number;
@@ -45,7 +46,6 @@ const Table: React.FC<Props> = ({ users, loading, getUsers, setLoading }) => {
       {/* Toolbar */}
       <Toolbar
         selectedIds={selectedIds}
-        users={users}
         getUsers={getUsers}
         setSelectedIds={setSelectedIds}
         setLoading={setLoading}
@@ -66,9 +66,9 @@ const Table: React.FC<Props> = ({ users, loading, getUsers, setLoading }) => {
                         onChange={handleSelectAll}
                       />
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       ID
-                    </th>
+                    </th> */}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Name
                     </th>
@@ -103,9 +103,9 @@ const Table: React.FC<Props> = ({ users, loading, getUsers, setLoading }) => {
                             onChange={() => handleSelectRow(user.id)}
                           />
                         </td>
-                        <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                        {/* <td className="px-6 py-4 text-sm font-medium text-gray-900">
                           {user.id}
-                        </td>
+                        </td> */}
                         <td className="px-6 py-4 text-sm text-gray-500">
                           {user.name}
                         </td>
@@ -113,10 +113,10 @@ const Table: React.FC<Props> = ({ users, loading, getUsers, setLoading }) => {
                           {user.email}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">
-                          {user.last_login_at}
+                          {formatDate(user.last_login_at)}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">
-                          {user.created_at}
+                          {formatDate(user.created_at)}
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-500">
                           {user.status}

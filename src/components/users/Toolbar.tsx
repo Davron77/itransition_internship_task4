@@ -1,13 +1,9 @@
 import React from "react";
 import { Lock, LockOpen, Trash2 } from "lucide-react";
-import { doc, setDoc, deleteDoc } from "firebase/firestore";
-import { db } from "@/utils/firabase-config";
-import { getAuth } from "firebase/auth";
-import adminAuth from "@/utils/firabase-admin-config";
+import { blockUsers, deleteUser, unBlockUsers } from "@/api/user";
 
 interface Props {
   selectedIds: string[];
-  users: any[];
   getUsers: () => void;
   setSelectedIds: React.Dispatch<React.SetStateAction<string[]>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
@@ -16,7 +12,6 @@ interface Props {
 
 const Toolbar: React.FC<Props> = ({
   selectedIds,
-  users,
   getUsers,
   setSelectedIds,
   setLoading,
@@ -27,13 +22,8 @@ const Toolbar: React.FC<Props> = ({
   const handleBlock = async () => {
     setLoading(true);
     try {
-      const updateFind = users.filter((user) => selectedIds.includes(user.id));
+      await blockUsers(selectedIds);
 
-      for (const newData of updateFind) {
-        const docRef = doc(db, "users", newData?.id);
-
-        await setDoc(docRef, { ...newData, status: "blocked" });
-      }
       getUsers();
       setSelectedIds([]);
       setSelectAll(false);
@@ -41,7 +31,7 @@ const Toolbar: React.FC<Props> = ({
       if (error instanceof Error) {
         alert(error.message);
       } else {
-        alert("somothing went wrong");
+        alert("Something went wrong");
       }
     } finally {
       setLoading(false);
@@ -51,16 +41,30 @@ const Toolbar: React.FC<Props> = ({
   const handleUnblock = async () => {
     setLoading(true);
     try {
-      const updateFind = users.filter((user) => selectedIds.includes(user.id));
+      unBlockUsers(selectedIds);
 
-      for (const newData of updateFind) {
-        const docRef = doc(db, "users", newData?.id);
-
-        await setDoc(docRef, { ...newData, status: "active" });
-      }
       getUsers();
       setSelectedIds([]);
       setSelectAll(false);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("Something went wrong");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    setLoading(true);
+    try {
+      for (const uid of selectedIds) {
+        await deleteUser(uid);
+      }
+      getUsers();
+      setSelectedIds([]);
     } catch (error: unknown) {
       if (error instanceof Error) {
         alert(error.message);
@@ -70,27 +74,6 @@ const Toolbar: React.FC<Props> = ({
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleDelete = async () => {
-    // setLoading(true);
-    // try {
-    //   for (const uid of selectedIds) {
-    //     console.log("uid", uid);
-    //     await deleteDoc(doc(db, "users", uid));
-    //     await adminAuth.deleteUser(uid);
-    //   }
-    //   getUsers();
-    //   setSelectedIds([]);
-    // } catch (error: unknown) {
-    //   if (error instanceof Error) {
-    //     alert(error.message);
-    //   } else {
-    //     alert("somothing went wrong");
-    //   }
-    // } finally {
-    //   setLoading(false);
-    // }
   };
 
   return (
