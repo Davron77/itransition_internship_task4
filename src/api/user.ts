@@ -1,24 +1,24 @@
-import axios from "axios";
-
-const API_URL = "http://localhost:5000";
+import http from "./util/https";
+import { API_ENDPOINTS } from "./util/api-endpoint";
 
 export const fetchUsers = async () => {
-  const response = await axios.get(`${API_URL}/users`);
-  return response.data;
+  const res = await http.get(API_ENDPOINTS.USERS);
+
+  return res.data;
 };
 
 export const blockUsers = async (userIds: String[]) => {
-  const response = await axios.post(`${API_URL}/block-users`, { userIds });
-  return response.data;
+  const res = await http.post(API_ENDPOINTS.USERS_BLOCK, { userIds });
+  return res.data;
 };
 
 export const unBlockUsers = async (userIds: String[]) => {
-  const response = await axios.post(`${API_URL}/unblock-users`, { userIds });
-  return response.data;
+  const res = await http.post(API_ENDPOINTS.USERS_UNBLOCK, { userIds });
+  return res.data;
 };
 
-export const deleteUser = async (uid: any) => {
-  const response = await axios.delete(`${API_URL}/users/${uid}`);
+export const deleteUser = async (uid: string) => {
+  const res = await http.delete(`${API_ENDPOINTS.USERS}/${uid}`);
 
-  return response.data;
+  return res.data;
 };
