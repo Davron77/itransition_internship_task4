@@ -1,0 +1,5 @@
+# Ignore Firebase Admin SDK credentials
+firebase-adminsdk*.json
+
+# Optional: ignore .env files (if you store credentials there)
+.env
