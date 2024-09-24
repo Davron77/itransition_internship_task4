@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getUserData } from "@/utils/localStorage";
+import { getToken } from "@/utils/localStorage";
 import { UserData } from "@/utils/types";
 import { useRouter } from "next/navigation";
 
@@ -15,7 +15,7 @@ const Header = () => {
   };
 
   useEffect(() => {
-    const userData = getUserData();
+    const userData = getToken();
     if (userData) {
       setUserData(userData);
     }

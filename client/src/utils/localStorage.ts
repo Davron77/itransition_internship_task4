@@ -1,14 +1,14 @@
 import { UserData } from "./types";
 
-export const getUserData = () => {
-  const token = localStorage.getItem("userData");
-  return JSON.parse(token || "{}") as UserData;
+export const getToken = () => {
+  const uid = localStorage.getItem("uid");
+  return JSON.parse(uid || "") as UserData;
 };
 
-export const setTUserData = (token: string) => {
-  localStorage.setItem("userData", token);
+export const setToken = (uid: string) => {
+  localStorage.setItem("uid", uid);
 };
 
-export const removeTUserData = () => {
-  localStorage.removeItem("userData");
+export const removeToken = () => {
+  localStorage.removeItem("uid");
 };

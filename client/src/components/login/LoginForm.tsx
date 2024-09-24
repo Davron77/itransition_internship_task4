@@ -4,8 +4,9 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/utils/firabase-config";
 import { useRouter } from "next/navigation";
 import Button from "../ui/Button";
-import { setTUserData } from "@/utils/localStorage";
+import { setToken } from "@/utils/localStorage";
 import Link from "next/link";
+import { login } from "@/api/auth";
 
 const LoginForm = () => {
   const [loading, setLoading] = useState(false);
@@ -17,8 +18,20 @@ const LoginForm = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const res = await signInWithEmailAndPassword(auth, email, password);
-      setTUserData(JSON.stringify(res.user));
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const user = userCredential.user;
+
+      // Get the ID token from Firebase Authentication
+      const idToken = await user.getIdToken();
+
+      // Send token to your backend for verification
+      const res = await login(idToken);
+
+      setToken(JSON.stringify(res.uid));
       router.push("/users");
     } catch (error: unknown) {
       if (error instanceof Error) {

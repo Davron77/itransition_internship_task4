@@ -10,6 +10,36 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+app.post("/login", async (req, res) => {
+  const { idToken } = req.body; // Get the token from the request body
+
+  if (!idToken) {
+    return res.status(400).send("No token provided");
+  }
+
+  try {
+    // Verify the token with Firebase Admin SDK
+    const decodedToken = await admin.auth().verifyIdToken(idToken);
+
+    // Token is valid, you can extract user information like uid
+    const uid = decodedToken.uid;
+
+    // Optionally, fetch user data from Firestore (or wherever you're storing it)
+    const userDoc = await db.collection("users").doc(uid).get();
+    const userData = userDoc.exists ? userDoc.data() : null;
+
+    // Respond with success and user data
+    res.status(200).json({
+      message: "Login successful",
+      uid,
+      userData, // You can return user data from Firestore if needed
+    });
+  } catch (error) {
+    console.error("Error verifying token:", error);
+    res.status(401).send("Unauthorized: Invalid token");
+  }
+});
+
 // Routes
 app.get("/", (req, res) => {
   res.send("Hello, World!");

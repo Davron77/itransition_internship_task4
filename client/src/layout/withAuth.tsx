@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, ComponentType } from "react";
 import { useRouter } from "next/navigation";
-import { getUserData } from "@/utils/localStorage";
+import { getToken } from "@/utils/localStorage";
 
 const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
   return (props: P) => {
@@ -9,7 +9,7 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-      const token = getUserData()?.stsTokenManager?.accessToken;
+      const token = getToken();
 
       if (!token) {
         router.push("/login");
