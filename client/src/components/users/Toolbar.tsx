@@ -4,7 +4,6 @@ import { blockUsers, deleteUser, unBlockUsers } from "@/api/user";
 
 interface Props {
   selectedIds: string[];
-  getUsers: () => void;
   setSelectedIds: React.Dispatch<React.SetStateAction<string[]>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectAll: React.Dispatch<React.SetStateAction<boolean>>;
@@ -12,7 +11,6 @@ interface Props {
 
 const Toolbar: React.FC<Props> = ({
   selectedIds,
-  getUsers,
   setSelectedIds,
   setLoading,
   setSelectAll,
@@ -23,8 +21,6 @@ const Toolbar: React.FC<Props> = ({
     setLoading(true);
     try {
       await blockUsers(selectedIds);
-
-      getUsers();
       setSelectedIds([]);
       setSelectAll(false);
     } catch (error: unknown) {
@@ -42,8 +38,6 @@ const Toolbar: React.FC<Props> = ({
     setLoading(true);
     try {
       unBlockUsers(selectedIds);
-
-      getUsers();
       setSelectedIds([]);
       setSelectAll(false);
     } catch (error: unknown) {
@@ -63,7 +57,6 @@ const Toolbar: React.FC<Props> = ({
       for (const uid of selectedIds) {
         await deleteUser(uid);
       }
-      getUsers();
       setSelectedIds([]);
     } catch (error: unknown) {
       if (error instanceof Error) {

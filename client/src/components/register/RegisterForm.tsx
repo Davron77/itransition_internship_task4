@@ -1,13 +1,11 @@
 "use client";
 
 import { useState, FormEvent } from "react";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth, db } from "@/utils/firabase-config";
-import { doc, setDoc } from "firebase/firestore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import Button from "../ui/Button";
-import { setTUserData } from "@/utils/localStorage";
+import { register } from "@/api/auth";
+import { setToken, setUserData } from "@/utils/localStorage";
 
 const RegisterForm = () => {
   const [loading, setLoading] = useState(false);
@@ -21,23 +19,14 @@ const RegisterForm = () => {
 
     setLoading(true);
     try {
-      const userCredential = await createUserWithEmailAndPassword(
-        auth,
+      const res = await register({
         email,
-        password
-      );
-
-      const user = userCredential.user;
-      await setDoc(doc(db, "users", user.uid), {
-        id: user.uid,
-        name: username,
-        email: email,
-        created_at: user?.metadata?.creationTime,
-        last_login_at: user?.metadata?.lastSignInTime,
-        status: "active",
+        password,
+        username,
       });
 
-      setTUserData(JSON.stringify(user));
+      setToken(JSON.stringify(res?.token));
+      setUserData(JSON.stringify(res?.email));
       router.push("/users");
     } catch (error: any) {
       alert(error.message);

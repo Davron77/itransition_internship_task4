@@ -5,50 +5,30 @@ const http = axios.create({
   timeout: 30000,
 });
 
-http.interceptors.request.use(
-  async (config) => {
-    try {
-      //   const token = await getToken();
-
-      //   config.headers = {
-      //     ...config.headers,
-      //     Authorization: `Bearer ${token?.value}`,
-      //   } as AxiosRequestHeaders;
-
-      return config;
-    } catch (error) {
-      return Promise.reject(error);
-    }
-  },
-  (error) => {
-    return Promise.reject(error);
-  }
-);
-
 http.interceptors.response.use(
   (response) =>
     new Promise((resolve, _reject) => {
       resolve(response);
     }),
+
   (error) => {
     if (!error.response) {
       return new Promise((_resolve, reject) => {
         reject(error.response);
       });
     }
-    // if (error.response.status === 403 || error.response.status === 401) {
-    //   if (window.location.pathname !== "/login") {
-    //     window.location = "/login" as Location | (string & Location);
-    //   }
-    //   deleteToken();
-    //   return new Promise((_resolve, reject) => {
-    //     reject(error.response);
-    //   });
-    // } else {
-    //   return new Promise((_resolve, reject) => {
-    //     reject(error.response);
-    //   });
-    // }
+    if (error.response.status === 403 || error.response.status === 401) {
+      if (window.location.pathname !== "/login") {
+        window.location = "/login" as Location | (string & Location);
+      }
+      return new Promise((_resolve, reject) => {
+        reject(error.response);
+      });
+    } else {
+      return new Promise((_resolve, reject) => {
+        reject(error.response);
+      });
+    }
   }
 );
 

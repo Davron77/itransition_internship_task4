@@ -1,21 +1,21 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { getToken } from "@/utils/localStorage";
-import { UserData } from "@/utils/types";
+import { getUserData, removeToken, removeUserData } from "@/utils/localStorage";
 import { useRouter } from "next/navigation";
 
 const Header = () => {
   const router = useRouter();
-  const [userData, setUserData] = useState<UserData>();
+  const [userData, setUserData] = useState<string | undefined>();
 
   const logoutHandler = () => {
-    localStorage.removeItem("userData");
+    removeToken();
+    removeUserData();
     router.push("/login");
   };
 
   useEffect(() => {
-    const userData = getToken();
+    const userData = getUserData();
     if (userData) {
       setUserData(userData);
     }
@@ -36,7 +36,7 @@ const Header = () => {
           </div>
           <div className="flex items-center gap-2 pr-2">
             <p className="text-gray-300">
-              Signed in as <strong>{userData ? userData?.email : ""}</strong>
+              Signed in as <strong>{userData ? userData : ""}</strong>
             </p>
             <button
               onClick={logoutHandler}

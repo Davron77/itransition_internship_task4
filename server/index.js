@@ -10,6 +10,8 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
+// Login
+
 app.post("/login", async (req, res) => {
   const { idToken } = req.body; // Get the token from the request body
 
@@ -28,11 +30,23 @@ app.post("/login", async (req, res) => {
     const userDoc = await db.collection("users").doc(uid).get();
     const userData = userDoc.exists ? userDoc.data() : null;
 
+    if (userData?.status === "blocked") {
+      console.log("blocked, blocked");
+      // User data not found in Firestore
+      return res.status(400).send({
+        code: 400,
+        message: "Your account has been blocked",
+      });
+    }
+
+    // Generate a custom token for the user
+    const token = await admin.auth().createCustomToken(uid);
+
     // Respond with success and user data
     res.status(200).json({
       message: "Login successful",
-      uid,
-      userData, // You can return user data from Firestore if needed
+      token,
+      email: userData?.email, // You can return user data from Firestore if needed
     });
   } catch (error) {
     console.error("Error verifying token:", error);
@@ -40,14 +54,53 @@ app.post("/login", async (req, res) => {
   }
 });
 
-// Routes
-app.get("/", (req, res) => {
-  res.send("Hello, World!");
+// Register
+
+app.post("/register", async (req, res) => {
+  const { email, password, username } = req.body; // Get the user data from the request body
+
+  if (!email || !password || !username) {
+    return res.status(400).send("Email, password, and username are required");
+  }
+
+  try {
+    // Create user in Firebase Authentication
+    const userRecord = await admin.auth().createUser({
+      email,
+      password,
+      displayName: username, // Use the username as the displayName
+    });
+
+    // Get the user metadata (creation and last sign-in times)
+    const user = await admin.auth().getUser(userRecord.uid);
+
+    // After creating the user, save additional details in Firestore
+    await db.collection("users").doc(userRecord.uid).set({
+      id: userRecord.uid,
+      name: username,
+      email: userRecord.email,
+      created_at: user.metadata.creationTime, // Store account creation time
+      last_login_at: user.metadata.lastSignInTime, // Store last login time (initially the same as creation time)
+      status: "active", // Default status for new users
+    });
+
+    // Generate a custom token for the user
+    const token = await admin.auth().createCustomToken(userRecord.uid);
+
+    res.status(201).json({
+      message: "User registered successfully",
+      token: token,
+      email: userRecord.email,
+    });
+  } catch (error) {
+    console.error("Error creating user:", error);
+    res.status(500).send("Error registering user: " + error.message);
+  }
 });
 
-// Example route to get user data
+// Get users
+
 app.get("/users", async (req, res) => {
-  console.log(`Hello`);
   try {
     const usersSnapshot = await db.collection("users").get();
     const users = usersSnapshot.docs.map((doc) => doc.data());
@@ -60,8 +113,6 @@ app.get("/users", async (req, res) => {
 // Route to block users by updating their status to 'blocked' in Firestore
 app.post("/block-users", async (req, res) => {
   const { userIds } = req.body;
-
-  console.log("userIds", userIds);
 
   if (!Array.isArray(userIds)) {
     return res.status(400).send("Invalid data format");
@@ -85,8 +136,6 @@ app.post("/block-users", async (req, res) => {
 app.post("/unblock-users", async (req, res) => {
   const { userIds } = req.body;
 
-  console.log("userIds", userIds);
-
   if (!Array.isArray(userIds)) {
     return res.status(400).send("Invalid data format");
   }
@@ -107,17 +156,14 @@ app.post("/unblock-users", async (req, res) => {
 
 // Example route to delete a user by ID
 app.delete("/users/:id", async (req, res) => {
-  //   console.log(`Deleting user with ID: ${userId}`);
   const userId = req.params.id; // Get the user ID from the request parameters
 
   try {
     // Step 1: Delete the user from Firebase Authentication
     await admin.auth().deleteUser(userId);
-    console.log(`User with ID: ${userId} deleted from Firebase Authentication`);
 
     // Step 2 (Optional): Delete user data from Firestore
     await db.collection("users").doc(userId).delete();
-    console.log(`User with ID: ${userId} deleted from Firestore`);
 
     res.status(200).send("User deleted successfully");
   } catch (error) {

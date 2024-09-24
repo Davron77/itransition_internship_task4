@@ -1,8 +1,6 @@
-import { UserData } from "./types";
-
 export const getToken = () => {
   const uid = localStorage.getItem("uid");
-  return JSON.parse(uid || "") as UserData;
+  return uid ? (JSON.parse(uid || "") as string) : "";
 };
 
 export const setToken = (uid: string) => {
@@ -11,4 +9,18 @@ export const setToken = (uid: string) => {
 
 export const removeToken = () => {
   localStorage.removeItem("uid");
+};
+
+export const getUserData = (): string => {
+  const UserData = localStorage.getItem("UserData");
+
+  return UserData ? (JSON.parse(UserData || "") as string) : "";
+};
+
+export const setUserData = (UserData: string) => {
+  localStorage.setItem("UserData", UserData);
+};
+
+export const removeUserData = () => {
+  localStorage.removeItem("UserData");
 };

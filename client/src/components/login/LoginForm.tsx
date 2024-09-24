@@ -4,7 +4,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/utils/firabase-config";
 import { useRouter } from "next/navigation";
 import Button from "../ui/Button";
-import { setToken } from "@/utils/localStorage";
+import { setToken, setUserData } from "@/utils/localStorage";
 import Link from "next/link";
 import { login } from "@/api/auth";
 
@@ -25,19 +25,19 @@ const LoginForm = () => {
       );
       const user = userCredential.user;
 
-      // Get the ID token from Firebase Authentication
       const idToken = await user.getIdToken();
 
-      // Send token to your backend for verification
       const res = await login(idToken);
 
-      setToken(JSON.stringify(res.uid));
+      setToken(JSON.stringify(res?.token));
+      setUserData(JSON.stringify(res?.email));
       router.push("/users");
     } catch (error: unknown) {
       if (error instanceof Error) {
         alert(error.message);
       } else {
-        alert("somothing went wrong");
+        //@ts-ignore
+        alert(error?.data?.message);
       }
     } finally {
       setLoading(false);

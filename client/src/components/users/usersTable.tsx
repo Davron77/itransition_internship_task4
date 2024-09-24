@@ -1,6 +1,9 @@
-import React, { useState } from "react";
+"use client";
+import React, { useState, useEffect } from "react";
 import Toolbar from "./Toolbar";
 import { formatDate } from "@/utils/format";
+import { collection, onSnapshot } from "firebase/firestore";
+import { db } from "@/utils/firabase-config";
 
 interface User {
   id: number;
@@ -12,15 +15,41 @@ interface User {
 }
 
 interface Props {
-  loading: boolean;
-  users: User[];
-  getUsers: () => void;
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  // loading: boolean;
+  // users: User[];
+  // setLoading: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const Table: React.FC<Props> = ({ users, loading, getUsers, setLoading }) => {
+const Table: React.FC<Props> = () => {
   const [selectedIds, setSelectedIds] = useState<any>([]);
   const [selectAll, setSelectAll] = useState<any>(false);
+
+  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    const unsub = onSnapshot(
+      collection(db, "users"),
+      (snapShot: any) => {
+        let list: User[] = [];
+
+        snapShot.docs.forEach((doc: any) => {
+          list.push({ id: doc.id, ...doc.data() } as User);
+        });
+
+        setUsers(list);
+        setLoading(false);
+        console.log("list", list);
+      },
+      (error) => {
+        console.log(error);
+      }
+    );
+
+    return () => {
+      unsub();
+    };
+  }, []);
 
   const handleSelectAll = () => {
     if (selectAll) {
@@ -46,7 +75,6 @@ const Table: React.FC<Props> = ({ users, loading, getUsers, setLoading }) => {
       {/* Toolbar */}
       <Toolbar
         selectedIds={selectedIds}
-        getUsers={getUsers}
         setSelectedIds={setSelectedIds}
         setLoading={setLoading}
         setSelectAll={setSelectAll}
@@ -66,9 +94,6 @@ const Table: React.FC<Props> = ({ users, loading, getUsers, setLoading }) => {
                         onChange={handleSelectAll}
                       />
                     </th>
-                    {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      ID
-                    </th> */}
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Name
                     </th>
