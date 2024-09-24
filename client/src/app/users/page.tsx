@@ -1,5 +1,8 @@
+"use client";
+
 import React from "react";
 import UsersTable from "@/components/users/usersTable";
+import withAuth from "@/layout/withAuth";
 
 const Users = () => {
   return (
@@ -9,5 +12,4 @@ const Users = () => {
   );
 };
 
-export default Users;
-// export default withAuth(Users);
+export default withAuth(Users);

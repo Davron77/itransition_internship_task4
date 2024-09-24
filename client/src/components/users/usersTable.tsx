@@ -14,13 +14,7 @@ interface User {
   status: string;
 }
 
-interface Props {
-  // loading: boolean;
-  // users: User[];
-  // setLoading: React.Dispatch<React.SetStateAction<boolean>>;
-}
-
-const Table: React.FC<Props> = () => {
+const Table = () => {
   const [selectedIds, setSelectedIds] = useState<any>([]);
   const [selectAll, setSelectAll] = useState<any>(false);
 

@@ -11,7 +11,6 @@ app.use(cors());
 app.use(bodyParser.json());
 
 // Login
-
 app.post("/login", async (req, res) => {
   const { idToken } = req.body; // Get the token from the request body
 
@@ -53,7 +52,7 @@ app.post("/login", async (req, res) => {
       message: "Login successful",
       token,
       email: userData?.email, // You can return user data from Firestore if needed
-    });
+          });
   } catch (error) {
     console.error("Error verifying token:", error);
     res.status(401).send("Unauthorized: Invalid token");
@@ -103,7 +102,7 @@ app.post("/register", async (req, res) => {
   }
 });
 
-// Get users
+// Get users from Firestore
 app.get("/users", async (req, res) => {
   try {
     const usersSnapshot = await db.collection("users").get();
@@ -114,7 +113,7 @@ app.get("/users", async (req, res) => {
   }
 });
 
-// Route to block users by updating their status to 'blocked' in Firestore
+// Block users by updating their status to 'blocked' in Firestore
 app.post("/block-users", async (req, res) => {
   const { userIds } = req.body;
 
@@ -136,7 +135,7 @@ app.post("/block-users", async (req, res) => {
   }
 });
 
-// Route to unblock users by updating their status to 'active' in Firestore
+// Unblock users by updating their status to 'active' in Firestore
 app.post("/unblock-users", async (req, res) => {
   const { userIds } = req.body;
 
@@ -158,7 +157,7 @@ app.post("/unblock-users", async (req, res) => {
   }
 });
 
-// Example route to delete a user by ID
+// Delete user from Firebase Authentication and Firestore
 app.delete("/users/:id", async (req, res) => {
   const userId = req.params.id; // Get the user ID from the request parameters
 
