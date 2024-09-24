@@ -39,6 +39,12 @@ app.post("/login", async (req, res) => {
       });
     }
 
+    // Update last_login_at field in Firestore
+    const currentTime = new Date().toISOString();
+    await db.collection("users").doc(uid).update({
+      last_login_at: currentTime,
+    });
+
     // Generate a custom token for the user
     const token = await admin.auth().createCustomToken(uid);
 
@@ -55,7 +61,6 @@ app.post("/login", async (req, res) => {
 });
 
 // Register
-
 app.post("/register", async (req, res) => {
   const { email, password, username } = req.body; // Get the user data from the request body
 
@@ -80,7 +85,7 @@ app.post("/register", async (req, res) => {
       name: username,
       email: userRecord.email,
       created_at: user.metadata.creationTime, // Store account creation time
-      last_login_at: user.metadata.lastSignInTime, // Store last login time (initially the same as creation time)
+      last_login_at: user.metadata.creationTime, // Store last login time (initially the same as creation time)
       status: "active", // Default status for new users
     });
 
@@ -99,7 +104,6 @@ app.post("/register", async (req, res) => {
 });
 
 // Get users
-
 app.get("/users", async (req, res) => {
   try {
     const usersSnapshot = await db.collection("users").get();
