@@ -1,28 +1,52 @@
-import React from "react";
+import React, { useState } from "react";
 import { Lock, LockOpen, Trash2 } from "lucide-react";
 import { blockUsers, deleteUser, unBlockUsers } from "@/api/user";
+import { getUserData, removeToken, removeUserData } from "@/utils/localStorage";
+import { useRouter } from "next/navigation";
 
 interface Props {
-  selectedIds: string[];
-  setSelectedIds: React.Dispatch<React.SetStateAction<string[]>>;
+  selected: any[];
+  setSelected: React.Dispatch<React.SetStateAction<any[]>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectAll: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const Toolbar: React.FC<Props> = ({
-  selectedIds,
-  setSelectedIds,
+  selected,
+  setSelected,
   setLoading,
   setSelectAll,
 }) => {
-  const isSelected = selectedIds?.length === 0;
+  const router = useRouter();
+  // const [isUserWarning, setIsUserWarning] = useState(false);
+
+  const isSelected = selected?.length === 0;
 
   const handleBlock = async () => {
     setLoading(true);
+    let isUserWarning = false;
+
+    const selectedIds = selected.map((item) => item?.id);
+
+    const UserData = getUserData();
+
+    const isUserBlocked = selected.find((item) => item?.email === UserData);
+
+    if (isUserBlocked?.email) {
+      console.log("User is already blocked");
+      isUserWarning = true;
+    }
+
     try {
       await blockUsers(selectedIds);
-      setSelectedIds([]);
+      setSelected([]);
       setSelectAll(false);
+
+      if (isUserWarning) {
+        console.log("User is already blocked two");
+        removeToken();
+        removeUserData();
+      }
     } catch (error: unknown) {
       if (error instanceof Error) {
         alert(error.message);
@@ -36,9 +60,12 @@ const Toolbar: React.FC<Props> = ({
 
   const handleUnblock = async () => {
     setLoading(true);
+
+    const selectedIds = selected.map((item) => item?.id);
+
     try {
       unBlockUsers(selectedIds);
-      setSelectedIds([]);
+      setSelected([]);
       setSelectAll(false);
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -53,11 +80,28 @@ const Toolbar: React.FC<Props> = ({
 
   const handleDelete = async () => {
     setLoading(true);
+    let isUserWarning = false;
+
+    const UserData = getUserData();
+
+    const isUserBlocked = selected.find((item) => item?.email === UserData);
+
+    if (isUserBlocked?.email) {
+      console.log("User is already blocked");
+      isUserWarning = true;
+    }
+
     try {
-      for (const uid of selectedIds) {
-        await deleteUser(uid);
+      for (const user of selected) {
+        await deleteUser(user?.id);
       }
-      setSelectedIds([]);
+      setSelected([]);
+
+      if (isUserWarning) {
+        console.log("User is already blocked two");
+        removeToken();
+        removeUserData();
+      }
     } catch (error: unknown) {
       if (error instanceof Error) {
         alert(error.message);

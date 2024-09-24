@@ -7,12 +7,12 @@ export const fetchUsers = async () => {
   return res?.data;
 };
 
-export const blockUsers = async (userIds: String[]) => {
+export const blockUsers = async (userIds: any[]) => {
   const res = await http.post(API_ENDPOINTS.USERS_BLOCK, { userIds });
   return res?.data;
 };
 
-export const unBlockUsers = async (userIds: String[]) => {
+export const unBlockUsers = async (userIds: any[]) => {
   const res = await http.post(API_ENDPOINTS.USERS_UNBLOCK, { userIds });
   return res?.data;
 };

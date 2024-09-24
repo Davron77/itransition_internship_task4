@@ -9,12 +9,12 @@ const http = axios.create({
 http.interceptors.request.use(
   async (config) => {
     try {
-      // const token = await getToken();
+      const token = await getToken();
 
-      // if (!token) {
-      //   window.location = "/login" as Location | (string & Location);
-      // }
-
+      config.headers = {
+        ...config.headers,
+        Authorization: `Bearer ${token}`,
+      } as AxiosRequestHeaders;
       return config;
     } catch (error) {
       return Promise.reject(error);

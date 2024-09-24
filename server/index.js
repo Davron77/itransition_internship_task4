@@ -52,7 +52,7 @@ app.post("/login", async (req, res) => {
       message: "Login successful",
       token,
       email: userData?.email, // You can return user data from Firestore if needed
-          });
+    });
   } catch (error) {
     console.error("Error verifying token:", error);
     res.status(401).send("Unauthorized: Invalid token");
@@ -104,7 +104,17 @@ app.post("/register", async (req, res) => {
 
 // Get users from Firestore
 app.get("/users", async (req, res) => {
+  const idToken = req.headers.authorization?.split("Bearer ")[1];
+
+  if (!idToken) {
+    return res.status(400).send({
+      code: 400,
+      message: "Your account has been blocked",
+    });
+  }
+
   try {
+    // const decodedToken = await admin.auth().verifyIdToken(idToken);
     const usersSnapshot = await db.collection("users").get();
     const users = usersSnapshot.docs.map((doc) => doc.data());
     res.status(200).json(users);
@@ -116,6 +126,15 @@ app.get("/users", async (req, res) => {
 // Block users by updating their status to 'blocked' in Firestore
 app.post("/block-users", async (req, res) => {
   const { userIds } = req.body;
+
+  const idToken = req.headers.authorization?.split("Bearer ")[1];
+
+  if (!idToken) {
+    return res.status(401).send({
+      code: 401,
+      message: "Your account has been blocked",
+    });
+  }
 
   if (!Array.isArray(userIds)) {
     return res.status(400).send("Invalid data format");
@@ -139,6 +158,15 @@ app.post("/block-users", async (req, res) => {
 app.post("/unblock-users", async (req, res) => {
   const { userIds } = req.body;
 
+  const idToken = req.headers.authorization?.split("Bearer ")[1];
+
+  if (!idToken) {
+    return res.status(401).send({
+      code: 401,
+      message: "Your account has been blocked",
+    });
+  }
+
   if (!Array.isArray(userIds)) {
     return res.status(400).send("Invalid data format");
   }
@@ -160,6 +188,15 @@ app.post("/unblock-users", async (req, res) => {
 // Delete user from Firebase Authentication and Firestore
 app.delete("/users/:id", async (req, res) => {
   const userId = req.params.id; // Get the user ID from the request parameters
+
+  const idToken = req.headers.authorization?.split("Bearer ")[1];
+
+  if (!idToken) {
+    return res.status(401).send({
+      code: 401,
+      message: "Your account has been blocked",
+    });
+  }
 
   try {
     // Step 1: Delete the user from Firebase Authentication

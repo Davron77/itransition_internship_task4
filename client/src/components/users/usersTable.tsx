@@ -15,7 +15,7 @@ interface User {
 }
 
 const Table = () => {
-  const [selectedIds, setSelectedIds] = useState<any>([]);
+  const [selected, setSelected] = useState<any>([]);
   const [selectAll, setSelectAll] = useState<any>(false);
 
   const [loading, setLoading] = useState(true);
@@ -47,20 +47,20 @@ const Table = () => {
 
   const handleSelectAll = () => {
     if (selectAll) {
-      setSelectedIds([]);
+      setSelected([]);
     } else {
-      setSelectedIds(users?.map((item) => item.id));
+      setSelected(users?.map((item) => item));
     }
     setSelectAll(!selectAll);
   };
 
-  const handleSelectRow = (id: any) => {
-    if (selectedIds.includes(id)) {
-      setSelectedIds(
-        selectedIds.filter((selectedId: any) => selectedId !== id)
+  const handleSelectRow = (user: any) => {
+    if (selected.includes(user)) {
+      setSelected(
+        selected.filter((selectedId: any) => selectedId?.id !== user?.id)
       );
     } else {
-      setSelectedIds([...selectedIds, id]);
+      setSelected([...selected, user]);
     }
   };
 
@@ -68,8 +68,8 @@ const Table = () => {
     <div className="container mx-auto px-4 py-4">
       {/* Toolbar */}
       <Toolbar
-        selectedIds={selectedIds}
-        setSelectedIds={setSelectedIds}
+        selected={selected}
+        setSelected={setSelected}
         setLoading={setLoading}
         setSelectAll={setSelectAll}
       />
@@ -118,8 +118,8 @@ const Table = () => {
                         <td className="px-6 py-4">
                           <input
                             type="checkbox"
-                            checked={selectedIds.includes(user.id)}
-                            onChange={() => handleSelectRow(user.id)}
+                            checked={selected.includes(user)}
+                            onChange={() => handleSelectRow(user)}
                           />
                         </td>
                         {/* <td className="px-6 py-4 text-sm font-medium text-gray-900">
