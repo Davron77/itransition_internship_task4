@@ -6,7 +6,7 @@ import { db } from "@/utils/firabase-config";
 import UserList from "./UserList";
 import { User } from "@/api/types";
 
-const UsersTable = () => {
+const UserTable = () => {
   const [selected, setSelected] = useState<User[]>([]);
   const [selectAll, setSelectAll] = useState<boolean>(false);
 
@@ -20,7 +20,7 @@ const UsersTable = () => {
         const list: User[] = [];
 
         snapShot.docs.forEach((doc) => {
-          //@ts-ignore 
+          //@ts-ignore
           list.push({ id: doc.id, ...doc.data() });
         });
 
@@ -76,4 +76,4 @@ const UsersTable = () => {
   );
 };
 
-export default UsersTable;
+export default UserTable;
