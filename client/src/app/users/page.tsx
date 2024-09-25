@@ -2,12 +2,12 @@
 
 import React from "react";
 import withAuth from "@/layout/withAuth";
-import UsersTable from "@/components/users/UsersTable";
+import UserTable from "../../components/users/UsersTable";
 
 const Users = () => {
   return (
     <>
-      <UsersTable />
+      <UserTable />
     </>
   );
 };
