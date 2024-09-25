@@ -11,9 +11,13 @@ http.interceptors.request.use(
     try {
       const token = await getToken();
 
+      if (!token) {
+        return config;
+      }
+
       config.headers = {
         ...config.headers,
-        Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${JSON.parse(token)}`,
       } as AxiosRequestHeaders;
       return config;
     } catch (error) {

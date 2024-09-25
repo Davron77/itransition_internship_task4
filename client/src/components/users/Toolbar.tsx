@@ -48,8 +48,8 @@ const Toolbar: React.FC<Props> = ({
         console.log("User is already blocked two");
         removeToken();
         removeUserData();
-        if (selectAll) {
-          router.push("/login");
+      if (selectAll) {
+        router.push("/login");
         }
       }
     } catch (error: unknown) {
@@ -69,7 +69,7 @@ const Toolbar: React.FC<Props> = ({
     const selectedIds = selected.map((item) => item?.id);
 
     try {
-      unBlockUsers(selectedIds);
+      await unBlockUsers(selectedIds);
       setSelected([]);
       setSelectAll(false);
     } catch (error: unknown) {
@@ -91,15 +91,16 @@ const Toolbar: React.FC<Props> = ({
 
     const isUserBlocked = selected.find((item) => item?.email === UserData);
 
+    const selectedIds = selected.map((item) => item?.id);
+
     if (isUserBlocked?.email) {
       console.log("User is already blocked");
       isUserWarning = true;
     }
 
     try {
-      for (const user of selected) {
-        await deleteUser(user?.id);
-      }
+      await deleteUser(selectedIds);
+
       setSelected([]);
 
       if (isUserWarning) {

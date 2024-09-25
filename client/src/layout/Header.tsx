@@ -3,15 +3,22 @@
 import React, { useState, useEffect } from "react";
 import { getUserData, removeToken, removeUserData } from "@/utils/localStorage";
 import { useRouter } from "next/navigation";
+import { logout } from "@/api/auth";
 
 const Header = () => {
   const router = useRouter();
   const [userData, setUserData] = useState<string | undefined>();
 
-  const logoutHandler = () => {
-    removeToken();
-    removeUserData();
-    router.push("/login");
+  const logoutHandler = async () => {
+    try {
+      await logout();
+
+      removeToken();
+      removeUserData();
+      router.push("/login");
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   useEffect(() => {

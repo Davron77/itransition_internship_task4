@@ -29,6 +29,7 @@ const RegisterForm = () => {
       setUserData(JSON.stringify(res?.email));
       router.push("/users");
     } catch (error: unknown) {
+      console.log(error);
       if (error instanceof Error) {
         alert(error.message);
       } else {

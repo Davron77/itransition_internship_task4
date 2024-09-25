@@ -18,16 +18,8 @@ const LoginForm = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
-      const user = userCredential.user;
 
-      const idToken = await user.getIdToken();
-
-      const res = await login(idToken);
+      const res = await login({ email, password });
 
       setToken(JSON.stringify(res?.token));
       setUserData(JSON.stringify(res?.email));

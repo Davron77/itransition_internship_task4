@@ -1,20 +1,20 @@
 export const getToken = () => {
-  const uid = localStorage.getItem("uid");
-  return uid ? (JSON.parse(uid || "") as string) : "";
+  const token = localStorage.getItem("token");
+  return token || "";
 };
 
-export const setToken = (uid: string) => {
-  localStorage.setItem("uid", uid);
+export const setToken = (token: string) => {
+  localStorage.setItem("token", token);
 };
 
 export const removeToken = () => {
-  localStorage.removeItem("uid");
+  localStorage.removeItem("token");
 };
 
 export const getUserData = (): string => {
   const UserData = localStorage.getItem("UserData");
 
-  return UserData ? (JSON.parse(UserData || "") as string) : "";
+  return UserData || "";
 };
 
 export const setUserData = (UserData: string) => {
