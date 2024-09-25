@@ -7,7 +7,7 @@ const { admin, db } = require("./firebase");
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({ methods: "GET,HEAD,PUT,PATCH,POST,DELETE", credentials: true }));
 app.use(bodyParser.json());
 
 // Login
