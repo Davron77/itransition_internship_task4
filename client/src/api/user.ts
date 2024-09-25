@@ -17,7 +17,7 @@ export const unBlockUsers = async (userIds: any[]) => {
   return res?.data;
 };
 
-export const deleteUser = async (uid: string) => {
+export const deleteUser = async (uid: number) => {
   const res = await http.delete(`${API_ENDPOINTS.USERS}/${uid}`);
 
   return res?.data;

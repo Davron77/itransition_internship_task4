@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React from "react";
 import { Lock, LockOpen, Trash2 } from "lucide-react";
 import { blockUsers, deleteUser, unBlockUsers } from "@/api/user";
 import { getUserData, removeToken, removeUserData } from "@/utils/localStorage";
 import { useRouter } from "next/navigation";
+import { User } from "@/api/types";
 
 interface Props {
-  selected: any[];
+  selected: User[];
+  selectAll: boolean;
   setSelected: React.Dispatch<React.SetStateAction<any[]>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectAll: React.Dispatch<React.SetStateAction<boolean>>;
@@ -13,12 +15,12 @@ interface Props {
 
 const Toolbar: React.FC<Props> = ({
   selected,
+  selectAll,
   setSelected,
   setLoading,
   setSelectAll,
 }) => {
   const router = useRouter();
-  // const [isUserWarning, setIsUserWarning] = useState(false);
 
   const isSelected = selected?.length === 0;
 
@@ -46,6 +48,7 @@ const Toolbar: React.FC<Props> = ({
         console.log("User is already blocked two");
         removeToken();
         removeUserData();
+        selectAll && router.push("/login");
       }
     } catch (error: unknown) {
       if (error instanceof Error) {

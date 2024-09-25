@@ -1,8 +1,8 @@
 "use client";
 
 import React from "react";
-import UsersTable from "@/components/users/usersTable";
 import withAuth from "@/layout/withAuth";
+import UsersTable from "@/components/users/usersTable";
 
 const Users = () => {
   return (
