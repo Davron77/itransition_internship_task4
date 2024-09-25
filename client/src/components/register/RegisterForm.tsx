@@ -28,8 +28,12 @@ const RegisterForm = () => {
       setToken(JSON.stringify(res?.token));
       setUserData(JSON.stringify(res?.email));
       router.push("/users");
-    } catch (error: any) {
-      alert(error.message);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        alert(error.message);
+      } else {
+        alert("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }

@@ -5,7 +5,7 @@ import React from "react";
 interface Props {
   selectAll: boolean;
   handleSelectAll: () => void;
-  handleSelectRow: (user: any) => void;
+  handleSelectRow: (user: User) => void;
   selected: User[];
   users: User[];
   loading: boolean;

@@ -27,7 +27,7 @@ http.interceptors.request.use(
 
 http.interceptors.response.use(
   (response) =>
-    new Promise((resolve, _reject) => {
+    new Promise((resolve) => {
       resolve(response);
     }),
 

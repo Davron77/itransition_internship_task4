@@ -16,11 +16,12 @@ const UsersTable = () => {
   useEffect(() => {
     const unsub = onSnapshot(
       collection(db, "users"),
-      (snapShot: any) => {
-        let list: User[] = [];
+      (snapShot) => {
+        const list: User[] = [];
 
-        snapShot.docs.forEach((doc: any) => {
-          list.push({ id: doc.id, ...doc.data() } as User);
+        snapShot.docs.forEach((doc) => {
+          //@ts-ignore 
+          list.push({ id: doc.id, ...doc.data() });
         });
 
         setUsers(list);
@@ -46,11 +47,9 @@ const UsersTable = () => {
     setSelectAll(!selectAll);
   };
 
-  const handleSelectRow = (user: any) => {
+  const handleSelectRow = (user: User) => {
     if (selected.includes(user)) {
-      setSelected(
-        selected.filter((selectedId: any) => selectedId?.id !== user?.id)
-      );
+      setSelected(selected.filter((selectedId) => selectedId?.id !== user?.id));
     } else {
       setSelected([...selected, user]);
     }

@@ -36,8 +36,7 @@ const LoginForm = () => {
       if (error instanceof Error) {
         alert(error.message);
       } else {
-        //@ts-ignore
-        alert(error?.data?.message);
+        alert("Something went wrong");
       }
     } finally {
       setLoading(false);

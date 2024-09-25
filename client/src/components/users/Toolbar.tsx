@@ -8,7 +8,7 @@ import { User } from "@/api/types";
 interface Props {
   selected: User[];
   selectAll: boolean;
-  setSelected: React.Dispatch<React.SetStateAction<any[]>>;
+  setSelected: React.Dispatch<React.SetStateAction<User[]>>;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectAll: React.Dispatch<React.SetStateAction<boolean>>;
 }
@@ -48,7 +48,9 @@ const Toolbar: React.FC<Props> = ({
         console.log("User is already blocked two");
         removeToken();
         removeUserData();
-        selectAll && router.push("/login");
+        if (selectAll) {
+          router.push("/login");
+        }
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
