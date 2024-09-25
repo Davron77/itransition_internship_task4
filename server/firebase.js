@@ -5,10 +5,9 @@ require("dotenv").config();
 admin.initializeApp({
   credential: admin.credential.cert({
     projectId: process.env.FIREBASE_PROJECT_ID,
-    privateKey: process.env.FIREBASE_PRIVATE_KEY, // Ensure newline characters are handled properly
+    privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n"), // Replace escaped \n with actual newlines
     clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
   }),
-  databaseURL: "https://your-project-id.firebaseio.com",
 });
 
 const db = admin.firestore();
