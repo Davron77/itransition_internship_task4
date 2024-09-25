@@ -32,7 +32,9 @@ const Toolbar: React.FC<Props> = ({
 
     const UserData = getUserData();
 
-    const isUserBlocked = selected.find((item) => item?.email === UserData);
+
+    //@ts-ignore
+    const isUserBlocked = selected.find((item) => item?.id === UserData);
 
     if (isUserBlocked?.email) {
       console.log("User is already blocked");
@@ -48,8 +50,8 @@ const Toolbar: React.FC<Props> = ({
         console.log("User is already blocked two");
         removeToken();
         removeUserData();
-      if (selectAll) {
-        router.push("/login");
+        if (selectAll) {
+          router.push("/login");
         }
       }
     } catch (error: unknown) {
@@ -89,7 +91,9 @@ const Toolbar: React.FC<Props> = ({
 
     const UserData = getUserData();
 
-    const isUserBlocked = selected.find((item) => item?.email === UserData);
+    //@ts-ignore
+
+    const isUserBlocked = selected.find((item) => item?.id === UserData);
 
     const selectedIds = selected.map((item) => item?.id);
 

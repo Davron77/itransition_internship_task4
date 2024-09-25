@@ -14,7 +14,11 @@ export const removeToken = () => {
 export const getUserData = (): string => {
   const UserData = localStorage.getItem("UserData");
 
-  return UserData || "";
+  if (!UserData) {
+    return "";
+  }
+
+  return JSON.parse(UserData);
 };
 
 export const setUserData = (UserData: string) => {
