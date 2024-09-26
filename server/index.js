@@ -3,213 +3,169 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const { admin, db } = require("./firebase");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 
 const app = express();
+
+// Secret key for JWT
+const JWT_SECRET = "your_jwt_secret_key"; // Change this to a secure secret
 
 // Middleware
 app.use(cors({ methods: "GET,HEAD,PUT,PATCH,POST,DELETE", credentials: true }));
 app.use(bodyParser.json());
 
-// Login
-app.post("/login", async (req, res) => {
-  const { idToken } = req.body; // Get the token from the request body
+// Middleware to verify the JWT token
+const authenticateToken = (req, res, next) => {
+  const token = req.headers["authorization"]?.split(" ")[1]; // Get token from header
 
-  if (!idToken) {
-    return res.status(400).send("No token provided");
-  }
+  if (!token) return res.sendStatus(401); // No token provided
+
+  jwt.verify(token, JWT_SECRET, (err, user) => {
+    if (err) return res.sendStatus(403); // Invalid token
+    req.user = user; // Save user info for later use
+    next(); // Proceed to the next middleware or route
+  });
+};
+
+// Registration endpoint
+app.post("/register", async (req, res) => {
+  const { email, password, username } = req.body;
 
   try {
-    // Verify the token with Firebase Admin SDK
-    const decodedToken = await admin.auth().verifyIdToken(idToken);
+    // Check if the email is already registered
+    const userDoc = await db.collection("users").doc(email).get();
 
-    // Token is valid, you can extract user information like uid
-    const uid = decodedToken.uid;
-
-    // Optionally, fetch user data from Firestore (or wherever you're storing it)
-    const userDoc = await db.collection("users").doc(uid).get();
-    const userData = userDoc.exists ? userDoc.data() : null;
-
-    if (userData?.status === "blocked") {
-      console.log("blocked, blocked");
-      // User data not found in Firestore
-      return res.status(400).send({
-        code: 400,
-        message: "Your account has been blocked",
-      });
+    if (userDoc.exists) {
+      return res.status(400).json({ message: "Email already registered!" });
     }
 
-    // Update last_login_at field in Firestore
-    const currentTime = new Date().toISOString();
-    await db.collection("users").doc(uid).update({
-      last_login_at: currentTime,
-    });
+    // Hash the password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Generate a custom token for the user
-    const token = await admin.auth().createCustomToken(uid);
-
-    // Respond with success and user data
-    res.status(200).json({
-      message: "Login successful",
-      token,
-      email: userData?.email, // You can return user data from Firestore if needed
-    });
-  } catch (error) {
-    console.error("Error verifying token:", error);
-    res.status(401).send("Unauthorized: Invalid token");
-  }
-});
-
-// Register
-app.post("/register", async (req, res) => {
-  const { email, password, username } = req.body; // Get the user data from the request body
-
-  if (!email || !password || !username) {
-    return res.status(400).send("Email, password, and username are required");
-  }
-
-  try {
-    // Create user in Firebase Authentication
-    const userRecord = await admin.auth().createUser({
+    // Store user data in Firestore
+    await db.collection("users").doc(email).set({
       email,
-      password,
-      displayName: username, // Use the username as the displayName
-    });
-
-    // Get the user metadata (creation and last sign-in times)
-    const user = await admin.auth().getUser(userRecord.uid);
-
-    // After creating the user, save additional details in Firestore
-    await db.collection("users").doc(userRecord.uid).set({
-      id: userRecord.uid,
       name: username,
-      email: userRecord.email,
-      created_at: user.metadata.creationTime, // Store account creation time
-      last_login_at: user.metadata.creationTime, // Store last login time (initially the same as creation time)
-      status: "active", // Default status for new users
+      password: hashedPassword,
+      createdAt: admin.firestore.FieldValue.serverTimestamp(),
+      lastLoginAt: admin.firestore.FieldValue.serverTimestamp(),
+      status: "active",
     });
 
-    // Generate a custom token for the user
-    const token = await admin.auth().createCustomToken(userRecord.uid);
+    // Generate a JWT token
+    const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "1h" });
 
-    res.status(201).json({
-      message: "User registered successfully",
-      token: token,
-      email: userRecord.email,
-    });
+    res
+      .status(201)
+      .json({ message: "User registered successfully!", token, email });
   } catch (error) {
-    console.error("Error creating user:", error);
-    res.status(500).send("Error registering user: " + error.message);
+    res.status(400).json({ message: error.message });
   }
 });
 
-// Get users from Firestore
-app.get("/users", async (req, res) => {
-  const idToken = req.headers.authorization?.split("Bearer ")[1];
-
-  if (!idToken) {
-    return res.status(400).send({
-      code: 400,
-      message: "Your account has been blocked",
-    });
-  }
+// Login endpoint
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
 
   try {
-    // const decodedToken = await admin.auth().verifyIdToken(idToken);
-    const usersSnapshot = await db.collection("users").get();
-    const users = usersSnapshot.docs.map((doc) => doc.data());
-    res.status(200).json(users);
+    const userDoc = await db.collection("users").doc(email).get();
+
+    if (!userDoc.exists) {
+      return res.status(404).json({ error: "User not found!" });
+    }
+
+    const userData = userDoc.data();
+
+    // Check if the user is active
+    if (userData.status === "blocked") {
+      return res.status(403).json({ error: "User is blocked!" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, userData.password);
+
+    if (!isPasswordValid) {
+      return res.status(401).json({ error: "Invalid password!" });
+    }
+
+    // Generate a JWT token
+    const token = jwt.sign({ email: userData.email }, JWT_SECRET, {
+      expiresIn: "1h",
+    });
+
+    res.json({ message: "Login successful!", token, email });
   } catch (error) {
-    res.status(500).send(error.message);
+    res.status(400).json({ error: error.message });
   }
 });
 
-// Block users by updating their status to 'blocked' in Firestore
-app.post("/block-users", async (req, res) => {
-  const { userIds } = req.body;
+// Logout endpoint
+app.post("/logout", authenticateToken, (req, res) => {
+  const token = req.token; // Assuming you store the token in the request
+  blacklistedTokens.add(token); // Add token to blacklist
+  res.json({ message: "Logged out successfully." });
+});
 
-  const idToken = req.headers.authorization?.split("Bearer ")[1];
-
-  if (!idToken) {
-    return res.status(401).send({
-      code: 401,
-      message: "Your account has been blocked",
-    });
-  }
-
-  if (!Array.isArray(userIds)) {
-    return res.status(400).send("Invalid data format");
-  }
+// Block user endpoint
+app.post("/block-users", authenticateToken, async (req, res) => {
+  const { userIds } = req.body; // Array of user IDs or emails to block
 
   try {
-    const updatePromises = userIds.map(async (id) => {
-      const userRef = db.collection("users").doc(id); // Firestore reference to the user doc
-      await userRef.update({ status: "blocked" }); // Update the user's status to 'blocked'
+    const batch = db.batch();
+
+    userIds.forEach((userId) => {
+      const userRef = db.collection("users").doc(userId);
+      batch.update(userRef, { status: "blocked" });
     });
 
-    await Promise.all(updatePromises); // Wait for all users to be updated
-    res.status(200).send("Users successfully blocked");
+    await batch.commit();
+    res.json({ message: "Users have been successfully blocked!" });
   } catch (error) {
-    console.error("Error blocking users:", error);
-    res.status(500).send("Error blocking users");
+    res.status(400).json({ error: error.message });
   }
 });
 
-// Unblock users by updating their status to 'active' in Firestore
-app.post("/unblock-users", async (req, res) => {
-  const { userIds } = req.body;
-
-  const idToken = req.headers.authorization?.split("Bearer ")[1];
-
-  if (!idToken) {
-    return res.status(401).send({
-      code: 401,
-      message: "Your account has been blocked",
-    });
-  }
-
-  if (!Array.isArray(userIds)) {
-    return res.status(400).send("Invalid data format");
-  }
+// Unblock user endpoint
+app.post("/unblock-users", authenticateToken, async (req, res) => {
+  const { userIds } = req.body; // Array of user IDs or emails to unblock
 
   try {
-    const updatePromises = userIds.map(async (id) => {
-      const userRef = db.collection("users").doc(id); // Firestore reference to the user doc
-      await userRef.update({ status: "active" }); // Update the user's status to 'active'
+    const batch = db.batch();
+
+    userIds.forEach((userId) => {
+      const userRef = db.collection("users").doc(userId);
+      batch.update(userRef, { status: "active" });
     });
 
-    await Promise.all(updatePromises); // Wait for all users to be updated
-    res.status(200).send("Users successfully unblocked");
+    await batch.commit();
+    res.json({ message: "Users have been successfully unblocked!" });
   } catch (error) {
-    console.error("Error unblocking users:", error);
-    res.status(500).send("Error unblocking users");
+    res.status(400).json({ error: error.message });
   }
 });
 
-// Delete user from Firebase Authentication and Firestore
-app.delete("/users/:id", async (req, res) => {
-  const userId = req.params.id; // Get the user ID from the request parameters
-
-  const idToken = req.headers.authorization?.split("Bearer ")[1];
-
-  if (!idToken) {
-    return res.status(401).send({
-      code: 401,
-      message: "Your account has been blocked",
-    });
-  }
+// Delete user endpoint
+app.post("/delete-users", authenticateToken, async (req, res) => {
+  const { userIds } = req.body; // Array of user IDs or emails to delete
 
   try {
-    // Step 1: Delete the user from Firebase Authentication
-    await admin.auth().deleteUser(userId);
+    const batch = db.batch();
 
-    // Step 2 (Optional): Delete user data from Firestore
-    await db.collection("users").doc(userId).delete();
+    userIds.forEach((userId) => {
+      const userRef = db.collection("users").doc(userId);
+      batch.delete(userRef); // Deleting the user document
+    });
 
-    res.status(200).send("User deleted successfully");
+    await batch.commit();
+    res.json({ message: "Users have been successfully deleted!" });
   } catch (error) {
-    console.error("Error deleting user:", error);
-    res.status(500).send("Error deleting user: " + error.message);
+    res.status(400).json({ error: error.message });
   }
+});
+
+// Example protected route
+app.get("/protected", authenticateToken, (req, res) => {
+  res.json({ message: "This is a protected route!", user: req.user });
 });
 
 // Start server
