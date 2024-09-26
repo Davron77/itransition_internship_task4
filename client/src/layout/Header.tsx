@@ -9,16 +9,16 @@ const Header = () => {
   const router = useRouter();
   const [userData, setUserData] = useState<string | undefined>();
 
-  const logoutHandler = async () => {
-    try {
-      await logout();
+  const logoutHandler = () => {
+    // try {
+    // await logout();
 
-      removeToken();
-      removeUserData();
-      router.push("/login");
-    } catch (error) {
-      console.log(error);
-    }
+    removeToken();
+    removeUserData();
+    router.push("/login");
+    // } catch (error) {
+    // console.log(error);
+    // }
   };
 
   useEffect(() => {
